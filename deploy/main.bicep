@@ -197,7 +197,8 @@ resource storage_blob_privendpt 'Microsoft.Network/privateEndpoints@2022-01-01' 
     manualPrivateLinkServiceConnections: []
     customNetworkInterfaceName: target_blob_privendpt_nic_name
     subnet: {
-      id: '${resourceGroup().id}/providers/Microsoft.Network/virtualNetworks/${vnet_name}/subnets/snet-pe'
+      //id: '${resourceGroup().id}/providers/Microsoft.Network/virtualNetworks/${vnet_name}/subnets/snet-pe'
+      id: vnet_resource::privateEndpointSubnet.id
     }
     ipConfigurations: []
     customDnsConfigs: []
@@ -254,7 +255,8 @@ resource functionApp 'Microsoft.Web/sites@2022-03-01' = {
   }
   properties: {
     serverFarmId: func_asp_resource.id
-    virtualNetworkSubnetId: '${resourceGroup().id}/providers/Microsoft.Network/virtualNetworks/${vnet_name}/subnets/snet-func'
+    //virtualNetworkSubnetId: '${resourceGroup().id}/providers/Microsoft.Network/virtualNetworks/${vnet_name}/subnets/snet-func'
+    virtualNetworkSubnetId: vnet_resource::functionSubnet.id
     vnetRouteAllEnabled: true
     siteConfig: {
       appSettings: [
