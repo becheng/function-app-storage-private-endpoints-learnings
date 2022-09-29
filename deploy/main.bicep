@@ -314,13 +314,13 @@ resource storage_blob_contributor_role_definition 'Microsoft.Authorization/roleD
 }
 
 // assign func's system identity with a storage blob contributor role to the target storage account
-resource func_storage_role_assignment_resource 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(subscription().id, func_name, storage_blob_contributor_role_definition.id)
-  scope: target_storage_acct_name_resource
-  properties: {
-    principalType: 'ServicePrincipal'
-    principalId: functionApp.identity.principalId
-    roleDefinitionId: storage_blob_contributor_role_definition.id
-  }
-}
+// resource func_storage_role_assignment_resource 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+//   name: guid(subscription().id, func_name, storage_blob_contributor_role_definition.id)
+//   scope: target_storage_acct_name_resource
+//   properties: {
+//     principalType: 'ServicePrincipal'
+//     principalId: functionApp.identity.principalId
+//     roleDefinitionId: storage_blob_contributor_role_definition.id
+//   }
+// }
 
