@@ -9,7 +9,8 @@ var target_blob_privendpt_name = '${resource_prefix}${unique_str}-blob-privendpt
 var target_blob_privendpt_nic_name = '${resource_prefix}${unique_str}-blob-privendpt-nic'
 var target_blob_container_name = 'default'
 var vnet_name = '${resource_prefix}-${unique_str}-vnet'
-var pdnszone_privatelink_blob_core_windows_net_name = 'privatelink.blob.core.windows.net'
+//var pdnszone_privatelink_blob_core_windows_net_name = 'privatelink.blob.core.windows.net'
+var pdnszone_privatelink_blob_core_windows_net_name = 'privatelink.blob.${environment().suffixes.storage}'
 
 // azure function info
 var func_name = '${resource_prefix}-${unique_str}-fa'
