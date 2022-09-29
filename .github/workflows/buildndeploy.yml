@@ -14,7 +14,7 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-     environment: sample
+    environment: sample
 
     steps:
       # Checkout code
