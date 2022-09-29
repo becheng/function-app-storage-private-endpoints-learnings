@@ -8,7 +8,13 @@ var target_storage_acct_name = '${resource_prefix}${unique_str}sa'
 var target_blob_privendpt_name = '${resource_prefix}${unique_str}-blob-privendpt'
 var target_blob_privendpt_nic_name = '${resource_prefix}${unique_str}-blob-privendpt-nic'
 var target_blob_container_name = 'default'
+
+// vnet info
 var vnet_name = '${resource_prefix}-${unique_str}-vnet'
+var functionSubnetName = 'snet-func'
+var privateEndpointSubnetName = 'snet-pe'
+
+
 //var pdnszone_privatelink_blob_core_windows_net_name = 'privatelink.blob.core.windows.net'
 var pdnszone_privatelink_blob_core_windows_net_name = 'privatelink.blob.${environment().suffixes.storage}'
 
@@ -72,25 +78,25 @@ resource vnet_resource 'Microsoft.Network/virtualNetworks@2022-01-01' = {
     }
     subnets: [
       {
-        name: 'snet-pe'
-        id: '${resourceGroup().id}/providers/Microsoft.Network/virtualNetworks/${vnet_name}/subnets/snet-pe'
+        name: privateEndpointSubnetName
+        //id: '${resourceGroup().id}/providers/Microsoft.Network/virtualNetworks/${vnet_name}/subnets/snet-pe'
         properties: {
           addressPrefix: '10.100.1.0/24'
-          delegations: []
+          //delegations: []
           privateEndpointNetworkPolicies: 'Disabled'
           privateLinkServiceNetworkPolicies: 'Enabled'
         }
-        type: 'Microsoft.Network/virtualNetworks/subnets'
+        //type: 'Microsoft.Network/virtualNetworks/subnets'
       }
       {
-        name: 'snet-func'
-        id: '${resourceGroup().id}/providers/Microsoft.Network/virtualNetworks/${vnet_name}/subnets/snet-func'
+        name: functionSubnetName
+        //id: '${resourceGroup().id}/providers/Microsoft.Network/virtualNetworks/${vnet_name}/subnets/snet-func'
         properties: {
           addressPrefix: '10.100.0.0/24'
-          serviceEndpoints: []
+          //serviceEndpoints: []
           delegations: [
             {
-              name: 'Microsoft.Web.serverFarms'
+              name: 'webapp'
               properties: {
                 serviceName: 'Microsoft.Web/serverFarms'
               }
@@ -99,11 +105,19 @@ resource vnet_resource 'Microsoft.Network/virtualNetworks@2022-01-01' = {
           privateEndpointNetworkPolicies: 'Enabled'
           privateLinkServiceNetworkPolicies: 'Enabled'
         }
-        type: 'Microsoft.Network/virtualNetworks/subnets'
+        //type: 'Microsoft.Network/virtualNetworks/subnets'
       }
     ]
-    virtualNetworkPeerings: []
-    enableDdosProtection: false
+    //virtualNetworkPeerings: []
+    //enableDdosProtection: false
+  }
+
+  resource functionSubnet 'subnets' existing = {
+    name: functionSubnetName
+  }
+
+  resource privateEndpointSubnet 'subnets' existing = {
+    name: privateEndpointSubnetName
   }
 }
 
