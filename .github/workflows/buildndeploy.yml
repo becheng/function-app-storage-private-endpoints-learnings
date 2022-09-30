@@ -85,6 +85,6 @@ jobs:
     - name: 'Package Azure Function release build'
       uses: actions/upload-artifact@v3.1.0
       with:
-       	name: build_artifacts
-       	path: ${{ env.BUILD_OUTPUT_PATH }}
-       	if-no-files-found: error
+        name: build_artifacts
+        path: ${{ env.BUILD_OUTPUT_PATH }}
+        if-no-files-found: error
