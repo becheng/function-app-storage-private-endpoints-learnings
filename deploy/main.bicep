@@ -313,14 +313,37 @@ resource storage_blob_contributor_role_definition 'Microsoft.Authorization/roleD
   name: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
 }
 
-// assign func's system identity with a storage blob contributor role to the target storage account
-// resource func_storage_role_assignment_resource 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-//   name: guid(subscription().id, func_name, storage_blob_contributor_role_definition.id)
-//   scope: target_storage_acct_name_resource
-//   properties: {
-//     principalType: 'ServicePrincipal'
-//     principalId: functionApp.identity.principalId
-//     roleDefinitionId: storage_blob_contributor_role_definition.id
-//   }
-// }
-
+/*
+assign func's system identity with a storage blob contributor role to the target storage account
+@TODO - for add role assignments, create a custom Azure role with the roleAssignments/write permission and
+assign to the github service principal, 
+Example:
+{
+    "properties": {
+        "roleName": "aCustomRBACRole",
+        "description": "",
+        "assignableScopes": [
+            "/subscriptions/<subscriptionId>/resourceGroups/<resource_group>"
+        ],
+        "permissions": [
+            {
+                "actions": [
+                    "Microsoft.Authorization/roleAssignments/write"
+                ],
+                "notActions": [],
+                "dataActions": [],
+                "notDataActions": []
+            }
+        ]
+    }
+}
+*/  
+resource func_storage_role_assignment_resource 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(subscription().id, func_name, storage_blob_contributor_role_definition.id)
+  scope: target_storage_acct_name_resource
+  properties: {
+    principalType: 'ServicePrincipal'
+    principalId: functionApp.identity.principalId
+    roleDefinitionId: storage_blob_contributor_role_definition.id
+  }
+}
