@@ -12,7 +12,7 @@ env:
   # AZURE_RESOURCE_GROUP_NAME: 'git-actions-deploy-func-demo'
   AZURE_FUNCTIONAPP_NAME: 'bc-lpgxl4xnti3ym-fa' # TODO: parameterize
   AZURE_FUNCTIONAPP_PACKAGE_PATH: './src/js-azure-func'
-  BUILD_OUTPUT_PATH: '${{ github.workspace }}/build-artifacts'
+  BUILD_OUTPUT_PATH: './build-artifacts'
   
   # BUILD_PACKAGE_NAME: 'az-func.zip'
 
@@ -68,6 +68,7 @@ jobs:
         # Version Spec of the version to use. Examples: 12.x, 10.15.1, >=10.15.0.
         node-version: ${{ env.NODEJS_VERSION }}
 
+      # resolve npm dependencies, build + test
     - name: 'Resolve Project Dependencies Using Npm'
       shell: bash
       run: |
@@ -75,4 +76,14 @@ jobs:
         npm install
         npm run build --if-present
         npm run test --if-present
-        popd
+        # popd
+    	  mkdir ${{ env.BUILD_OUTPUT_PATH }}
+    	  zip -r ${{ env.BUILD_OUTPUT_PATH }}/${{ env.BUILD_PACKAGE_NAME }} .
+
+      # Upload the code artifact, this will be used later
+   	- name: 'Package Azure Function release build'
+      uses: actions/upload-artifact@v3.1.0
+     	with:
+       	name: build_artifacts
+       	path: ${{ env.BUILD_OUTPUT_PATH }}
+       	if-no-files-found: error
