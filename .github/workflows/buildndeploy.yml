@@ -76,9 +76,9 @@ jobs:
         npm install
         npm run build --if-present
         npm run test --if-present
-        # popd
     	  mkdir ${{ env.BUILD_OUTPUT_PATH }}
     	  zip -r ${{ env.BUILD_OUTPUT_PATH }}/${{ env.BUILD_PACKAGE_NAME }} .
+        # popd
 
       # Upload the code artifact, this will be used later
    	- name: 'Package Azure Function release build'
