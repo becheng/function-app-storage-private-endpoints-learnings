@@ -78,7 +78,7 @@ jobs:
         npm run build --if-present
         npm run test --if-present
         mkdir ${{ env.BUILD_OUTPUT_PATH }}
-    	  zip -r ${{ env.BUILD_OUTPUT_PATH }}/${{ env.BUILD_PACKAGE_NAME }} .
+        zip -r ${{ env.BUILD_OUTPUT_PATH }}/${{ env.BUILD_PACKAGE_NAME }} .
         # popd
 
       # Upload the code artifact, this will be used later
