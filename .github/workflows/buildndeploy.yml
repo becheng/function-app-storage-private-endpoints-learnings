@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 env:
-  NODEJS_VERSION: '16.x' 
+  NODEJS_VERSION: '18.1.0' 
   # AZURE_RESOURCE_GROUP_NAME: 'git-actions-deploy-func-demo'
   AZURE_FUNCTIONAPP_NAME: 'bc-lpgxl4xnti3ym-fa' # TODO: parameterize
   AZURE_FUNCTIONAPP_PACKAGE_PATH: '${{ github.workspace }}/src/js-azure-func'
@@ -65,8 +65,9 @@ jobs:
     - name: Setup Node.js environment
       uses: actions/setup-node@v3.5.0
       with:
+        # Version Spec of the version to use. Examples: 12.x, 10.15.1, >=10.15.0.
         node-version: ${{ env.NODEJS_VERSION }}
-  	 
+
     - name: 'Resolve Project Dependencies Using Npm'
       shell: bash
       run: |
