@@ -6,13 +6,28 @@ name: function to private endpoint storage sample
 on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+
+env:
+  NODEJS_VERSION: 'v18.1.0'
+  # AZURE_RESOURCE_GROUP_NAME: 'git-actions-deploy-func-demo'
+  AZURE_FUNCTIONAPP_NAME: 'bc-lpgxl4xnti3ym-fa' # TODO: parameterize
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: '${{ github.workspace }}/src/js-azure-func'
+  BUILD_OUTPUT_PATH: '${{ github.workspace }}/build-artifacts'
   
+  # BUILD_PACKAGE_NAME: 'az-func.zip'
+
+defaults:
+  run:
+    shell: bash
+
 permissions:
   id-token: write
   contents: read
 
 jobs:
-  build-and-deploy:
+
+  # 1. deploy the azure infra
+  deploy-az-infra:
     runs-on: ubuntu-latest
     environment: sample
 
@@ -36,3 +51,27 @@ jobs:
         template: ./deploy/main.bicep
         #parameters: 'storagePrefix=mystore storageSKU=Standard_LRS'
         failOnStdErr: false
+  
+  # 2. build the code
+  build-az-function:
+    needs: [deploy-az-infra]
+    runs-on: ubuntu-latest
+    environment: sample
+
+    steps:    
+      # Checkout code
+    - uses: actions/checkout@v3
+
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v3.5.0
+      with:
+        node-version: ${{ env.NODEJS_VERSION }}
+  	 
+    - name: 'Resolve Project Dependencies Using Npm'
+      shell: bash
+      run: |
+        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+        npm install
+        npm run build --if-present
+        npm run test --if-present
+        popd
