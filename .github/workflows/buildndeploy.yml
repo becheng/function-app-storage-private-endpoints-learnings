@@ -1,5 +1,5 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+# IMPORTANT Reminders:
+# 1. The service principal used by the github action must be assigned a custom rbac role with the microsoft/authority/roleassignment/write
 
 name: function to private endpoint storage sample
 
@@ -78,7 +78,8 @@ jobs:
         npm run test --if-present
         popd
         mkdir ${{ env.BUILD_OUTPUT_PATH }}
-        zip -r ${{ env.BUILD_OUTPUT_PATH }}/${{ env.BUILD_PACKAGE_NAME }} ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+        cd '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+        zip -r ../${{ env.BUILD_OUTPUT_PATH }}/${{ env.BUILD_PACKAGE_NAME }} . 
 
       # Upload the code artifact, this will be used later
     - name: 'Package Azure Function release build'
