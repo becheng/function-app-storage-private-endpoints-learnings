@@ -130,7 +130,8 @@ jobs:
         path: ${{ env.BUILD_OUTPUT_PATH }}
 
     - name: 'publish fcn zip to fcn app'
-      run: |
-        echo ${{ steps.fncapp.outputs.pubprofile }}
-        echo "------------------------------------"
-        cat ${{ env.BUILD_OUTPUT_PATH }}/${{ env.BUILD_PACKAGE_NAME }}
+      uses: Azure/functions-action@v1.4.7
+      with:
+        app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+        package: ${{ env.BUILD_OUTPUT_PATH }}/${{ env.BUILD_PACKAGE_NAME }}
+        publish-profile: ${{ steps.fncapp.outputs.pubprofile }}  
