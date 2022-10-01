@@ -1,5 +1,7 @@
 # IMPORTANT Reminders:
-# 1. The service principal used by the github action must be assigned a custom rbac role with the microsoft/authority/roleassignment/write
+# 1. The service principal used by the github action must be assigned a an Azure custom rbac role with 
+#    the microsoft.authority/roleassignment/write permission in order to run the roleassignment in the bicep file
+# 2. The service principal used by the github action at a minimum have the Azure Contributor role at the target resource group.
 
 name: function to private endpoint storage sample
 
@@ -9,8 +11,6 @@ on:
 
 env:
   NODEJS_VERSION: '18.1.0' 
-  # AZURE_RESOURCE_GROUP_NAME: 'git-actions-deploy-func-demo'
-  AZURE_FUNCTIONAPP_NAME: 'bc-lpgxl4xnti3ym-fa' # TODO: parameterize
   AZURE_FUNCTIONAPP_PACKAGE_PATH: './src'
   BUILD_OUTPUT_PATH: './build-artifacts'  
   BUILD_PACKAGE_NAME: 'az-func.zip'
@@ -27,9 +27,11 @@ jobs:
 
   # 1. deploy the azure infra
   deploy-az-infra:
-    if: ${{ false }} #disable for now
+    #if: ${{ false }} #disable for now
     runs-on: ubuntu-latest
     environment: sample
+    outputs:
+      fcn-app-name: ${{ steps.getFcnAppName.outputs.fcnAppName }}
 
     steps:
       # Checkout code
@@ -41,7 +43,32 @@ jobs:
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        
+
+      # Hash the resource group's ID so it's unique but also repeatable
+      # steps: 
+      # 1. retrieve the resouceGroup's id property
+      # 2. hash the id and take the first 10 chars of the hash
+      # 3. set the output to a var so it may be referred in the deploy task to set   
+    - name: generate unique fcn app suffix 
+      uses: azure/cli@v1
+      id: fcnappsuffix
+      with:
+        inlineScript: |
+          rsGroupId=$(az group list --query "[?name=='${{ secrets.AZURE_RG }}'].id" -o tsv)
+          suffix="${$(echo -n $rsGroupId | shasum):0:10}"
+          echo "::set-output name=fcnSuffix :: $suffix"
+          unset rsGroupId
+          unset suffix
+        azcliversion: "latest"
+
+      # generate fcnAppName based on pefcn+suffix 
+    - name: generate fcn app name
+      id: getFcnAppName
+      shell: bash
+      run: |
+        fcnAppName=pefcn${{ steps.fcnappsuffix.outputs.fcnSuffix }}
+        echo "::set-output name=fcnAppName :: $fcnAppName"
+      
       # Deploy Bicep file
     - name: deploy
       uses: azure/arm-deploy@v1.0.8
@@ -49,12 +76,12 @@ jobs:
         subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         resourceGroupName: ${{ secrets.AZURE_RG }}
         template: ./deploy/main.bicep
-        #parameters: 'storagePrefix=mystore storageSKU=Standard_LRS'
+        parameters: 'func_name=${{ steps.getFcnAppName.outputs.fcnAppName }}' 
         failOnStdErr: false
   
   # 2. build the code
   build-az-function:
-    #needs: [deploy-az-infra]
+    needs: [deploy-az-infra]
     runs-on: ubuntu-latest
     environment: sample
 
@@ -69,6 +96,11 @@ jobs:
         node-version: ${{ env.NODEJS_VERSION }}
 
       # resolve npm dependencies, build + test
+      # Notes: 
+      #   zip -r ../${{ env.BUILD_OUTPUT_PATH }}/${{ env.BUILD_PACKAGE_NAME }} .
+      #   '-r' means it's going to zip all contents and directories recursively
+      #   '../' is traversing up a directory, note the line above it, the 'mkdir' is createing an output directory at the root where the src dir resides 
+      #   '.' means the current directory, i.e. starting zipping at this dir 
     - name: 'Resolve Project Dependencies Using Npm'
       shell: bash
       run: |
@@ -114,7 +146,7 @@ jobs:
       id: fcnapp
       with:
         inlineScript: |
-          profile=$(az webapp deployment list-publishing-profiles -g "${{ secrets.AZURE_RG }}" -n "${{ env.AZURE_FUNCTIONAPP_NAME }}" --xml)          
+          profile=$(az webapp deployment list-publishing-profiles -g "${{ secrets.AZURE_RG }}" -n "${{ needs.deploy-az-infra.outputs.fcn-app-name }}" --xml)          
           echo "::set-output name=pubprofile :: $profile"
           unset profile
         azcliversion: "latest"
@@ -133,6 +165,6 @@ jobs:
     - name: 'publish fcn zip to fcn app'
       uses: Azure/functions-action@v1.4.7
       with:
-        app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+        app-name: ${{ needs.deploy-az-infra.outputs.fcn-app-name }} 
         package: ${{ env.BUILD_OUTPUT_PATH }}/${{ env.BUILD_PACKAGE_NAME }}
         publish-profile: ${{ steps.fncapp.outputs.pubprofile }}  

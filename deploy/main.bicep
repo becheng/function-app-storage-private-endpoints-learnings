@@ -1,28 +1,29 @@
-param location string = 'canadacentral'
+@description('The location into which the resources should be deployed.')
+param location string = resourceGroup().location
 
-var resource_prefix = 'bc'
-var unique_str = uniqueString(subscription().subscriptionId)
+@description('The name of the Azure function app.')
+param func_name string = 'pefcn${uniqueString(resourceGroup().id)}'
 
-// storage/blob info
-var target_storage_acct_name = '${resource_prefix}${unique_str}sa'
-var target_blob_privendpt_name = '${resource_prefix}${unique_str}-blob-privendpt'
-var target_blob_privendpt_nic_name = '${resource_prefix}${unique_str}-blob-privendpt-nic'
+// var resource_prefix = 'bc'
+// var unique_str = uniqueString(resourceGroup().id))
+
+// azure function info
+var func_asp_name = '${func_name}-asp'
+var func_attached_storage_name = '${func_name}fsa'
+var func_app_insights_name = '${func_name}-ai'
+
+// private endpoint enabled storage/blob info
+var target_storage_acct_name = 'pe${func_name}sa'
+var target_blob_privendpt_name = 'pe${func_name}-blob'
+var target_blob_privendpt_nic_name = 'pe${func_name}-blob-nic'
 var target_blob_container_name = 'default'
 
 // vnet info
-var vnet_name = '${resource_prefix}-${unique_str}-vnet'
+var vnet_name = '${func_name}-vnet'
 var functionSubnetName = 'snet-func'
 var privateEndpointSubnetName = 'snet-pe'
-
-
-//var pdnszone_privatelink_blob_core_windows_net_name = 'privatelink.blob.core.windows.net'
 var pdnszone_privatelink_blob_core_windows_net_name = 'privatelink.blob.${environment().suffixes.storage}'
 
-// azure function info
-var func_name = '${resource_prefix}-${unique_str}-fa'
-var func_asp_name = '${resource_prefix}-${unique_str}-asp'
-var func_attached_storage_name = '${resource_prefix}${unique_str}funcsa'
-var func_app_insights_name = '${resource_prefix}-${unique_str}-ai'
 
 // target storage account that will have a private endpoint blob
 resource target_storage_acct_name_resource 'Microsoft.Storage/storageAccounts@2021-09-01' = {
