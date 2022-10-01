@@ -55,7 +55,9 @@ jobs:
       with:
         inlineScript: |
           rsGroupId=$(az group list --query "[?name=='${{ secrets.AZURE_RG }}'].id" -o tsv)
+          echo "resource group id: $rsGroupId"
           suffix="${$(echo -n $rsGroupId | shasum):0:10}"
+          echo "generated suffix: $suffix"
           echo "::set-output name=fcnSuffix :: $suffix"
           unset rsGroupId
           unset suffix
