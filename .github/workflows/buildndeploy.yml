@@ -113,7 +113,7 @@ jobs:
       id: fcnapp
       with:
         inlineScript: |
-          profile = $(az webapp deployment list-publishing-profiles -g "${{ secrets.AZURE_RG }}" -n "${{ env.AZURE_FUNCTIONAPP_NAME }}" --xml)          
+          profile=$(az webapp deployment list-publishing-profiles -g "${{ secrets.AZURE_RG }}" -n "${{ env.AZURE_FUNCTIONAPP_NAME }}" --xml)          
           echo "::set-output name=pubprofile :: $profile"
           unset profile
         azcliversion: "latest"
