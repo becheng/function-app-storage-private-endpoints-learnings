@@ -51,10 +51,10 @@ jobs:
       # 3. set the output to a var so it may be referred in the deploy task to set   
     - name: generate unique fcn app suffix 
       uses: azure/cli@v1
-      shell: bash
       id: fcnappsuffix
       with:
         inlineScript: |
+          #!/bin/bash
           rsGroupId=$(az group list --query "[?name=='${{ secrets.AZURE_RG }}'].id" -o tsv)
           echo "resource group id: $rsGroupId"
           hashStr=$(echo -n $rsGroupId | shasum)
