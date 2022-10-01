@@ -12,9 +12,8 @@ env:
   # AZURE_RESOURCE_GROUP_NAME: 'git-actions-deploy-func-demo'
   AZURE_FUNCTIONAPP_NAME: 'bc-lpgxl4xnti3ym-fa' # TODO: parameterize
   AZURE_FUNCTIONAPP_PACKAGE_PATH: './src'
-  BUILD_OUTPUT_PATH: './build-artifacts'
-  
-  # BUILD_PACKAGE_NAME: 'az-func.zip'
+  BUILD_OUTPUT_PATH: './build-artifacts'  
+  BUILD_PACKAGE_NAME: 'az-func.zip'
 
 defaults:
   run:
@@ -114,12 +113,12 @@ jobs:
       id: fcnapp
       with:
         inlineScript: |
-          $profile = az webapp deployment list-publishing-profiles -g ${{ secrets.AZURE_RG }} -n ${{ env.AZURE_FUNCTIONAPP_NAME }} --xml
-          echo "::set-output name=pubprofile::$profile"
+          profile = ${az webapp deployment list-publishing-profiles -g "${{ secrets.AZURE_RG }}" -n "${{ env.AZURE_FUNCTIONAPP_NAME }}" --xml}          
+          echo "::set-output name=pubprofile :: $profile"
           unset profile
         azcliversion: "latest"
 
-    - name: 'creat output dir'
+    - name: 'create output dir'
       shell: bash
       run: |
         mkdir ${{ env.BUILD_OUTPUT_PATH }}
@@ -129,3 +128,9 @@ jobs:
       with:
         name: build_artifacts
         path: ${{ env.BUILD_OUTPUT_PATH }}
+
+    - name: 'publish fcn zip to fcn app'
+      run: |
+        echo ${{ steps.fncapp.outputs.pubprofile }}
+        echo "------------------------------------"
+        cat ${{ env.BUILD_OUTPUT_PATH }}/${{ env.BUILD_PACKAGE_NAME }}
