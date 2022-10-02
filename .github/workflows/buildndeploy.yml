@@ -49,23 +49,36 @@ jobs:
       # 1. retrieve the resouceGroup's id property
       # 2. hash the id and take the first 10 chars of the hash
       # 3. set the output to a var so it may be referred in the deploy task to set   
+    # - name: generate unique fcn app suffix 
+    #   uses: azure/cli@v1
+    #   id: fcnappsuffix
+    #   with:
+    #     inlineScript: |
+    #       #!/bin/bash
+    #       rsGroupId=$(az group list --query "[?name=='${{ secrets.AZURE_RG }}'].id" -o tsv)
+    #       echo "resource group id: $rsGroupId"
+    #       hashStr=$(echo -n $rsGroupId | shasum)
+    #       echo "hash: $hashStr"
+    #       suffix="${$hashStr:0:10}"
+    #       echo "generated suffix: $suffix"
+    #       echo "::set-output name=fcnSuffix :: $suffix"
+    #       unset rsGroupId
+    #       unset suffix
+    #     azcliversion: "latest"
     - name: generate unique fcn app suffix 
-      uses: azure/cli@v1
       id: fcnappsuffix
-      with:
-        inlineScript: |
-          #!/bin/bash
-          rsGroupId=$(az group list --query "[?name=='${{ secrets.AZURE_RG }}'].id" -o tsv)
-          echo "resource group id: $rsGroupId"
-          hashStr=$(echo -n $rsGroupId | shasum)
-          echo "hash: $hashStr"
-          suffix="${$hashStr:0:10}"
-          echo "generated suffix: $suffix"
-          echo "::set-output name=fcnSuffix :: $suffix"
-          unset rsGroupId
-          unset suffix
-        azcliversion: "latest"
-
+      shell: bash
+      run: |
+        rsGroupId=$(az group list --query "[?name=='${{ secrets.AZURE_RG }}'].id" -o tsv)
+        echo "resource group id: $rsGroupId"
+        hashStr=$(echo -n $rsGroupId | shasum)
+        echo "hash: $hashStr"
+        suffix="${$hashStr:0:10}"
+        echo "generated suffix: $suffix"
+        echo "::set-output name=fcnSuffix :: $suffix"
+        unset rsGroupId
+        unset suffix
+               
       # generate fcnAppName based on pefcn+suffix 
     - name: generate fcn app name
       id: getFcnAppName
