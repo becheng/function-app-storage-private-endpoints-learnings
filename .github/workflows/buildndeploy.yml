@@ -65,15 +65,14 @@ jobs:
     #       unset rsGroupId
     #       unset suffix
     #     azcliversion: "latest"
+
     - name: generate unique fcn app suffix 
       id: fcnappsuffix
       shell: bash
       run: |
         rsGroupId=$(az group list --query "[?name=='${{ secrets.AZURE_RG }}'].id" -o tsv)
         echo "resource group id: $rsGroupId"
-        hashStr=$(echo -n $rsGroupId | shasum)
-        echo "hash: $hashStr"
-        suffix="${$hashStr:0:10}"
+        suffix=$(echo -n $rsGroupId | shasum | cut -c1-8)
         echo "generated suffix: $suffix"
         echo "::set-output name=fcnSuffix :: $suffix"
         unset rsGroupId
