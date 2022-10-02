@@ -56,8 +56,8 @@ jobs:
         rsGroupId=$(az group list --query "[?name=='${{ secrets.AZURE_RG }}'].id" -o tsv)
         echo "resource group id: $rsGroupId"
         suffix=$(echo -n $rsGroupId | shasum | cut -c1-8)
-        echo "generated suffix: $suffix"
-        echo "::set-output name=fcnSuffix :: $suffix"
+        echo "generated suffix:$suffix"
+        echo "::set-output name=fcnSuffix::$suffix"
         unset rsGroupId
         unset suffix
                
@@ -66,7 +66,7 @@ jobs:
       id: getFcnAppName
       shell: bash
       run: |
-        fcnAppName="pefcn${{ steps.fcnappsuffix.outputs.fcnSuffix }}"
+        fcnAppName="pefcn${{steps.fcnappsuffix.outputs.fcnSuffix}}"
         echo "::set-output name=fcnAppName::$fcnAppName"
       
       # Deploy Bicep file
@@ -76,7 +76,7 @@ jobs:
         subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         resourceGroupName: ${{ secrets.AZURE_RG }}
         template: ./deploy/main.bicep
-        parameters: 'func_name=${{ steps.getFcnAppName.outputs.fcnAppName }}' 
+        parameters: 'func_name=${{steps.getFcnAppName.outputs.fcnAppName}}' 
         failOnStdErr: false
   
   # 2. build the code
