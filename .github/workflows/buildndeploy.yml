@@ -67,7 +67,7 @@ jobs:
       shell: bash
       run: |
         fcnAppName="pefcn${{ steps.fcnappsuffix.outputs.fcnSuffix }}"
-        echo "::set-output name=fcnAppName :: $fcnAppName"
+        echo "::set-output name=fcnAppName::$fcnAppName"
       
       # Deploy Bicep file
     - name: deploy
